@@ -58,7 +58,7 @@ class VideoStore:
         """
         return json.dumps({vid: vars(self._videos[vid]) for vid in self._videos}, default=str)
 
-    def deserialize(self, json_string: str) -> None:
+    def deserialize(self, json_string):
         """
         Deserializes a JSON string to populate the video store.
 
@@ -67,7 +67,8 @@ class VideoStore:
         """
         video_data = json.loads(json_string)
         for vid in video_data:
-            self.add_video(Video(video_data[vid]))
+            video = Video.from_json_data(video_data[vid])
+            self.add_video(video)
 
     def __repr__(self) -> str:
         return f"VideoStore with {len(self._videos)} videos"

@@ -3,23 +3,49 @@ import re
 
 
 class Video:
-    def __init__(self, video_data):
+    def __init__(self):
+        self.url = None
+        self.video_id = None
+        self.description = None
+        self.duration = None
+        self.published_date = None
+        self.publisher = None
+        self.statistics = None
+        self.title = None
+        self.uploader = None
+        self.transcript = None
+
+    @classmethod
+    def from_search_data(cls, search_data):
         """
-        Initialize the Video object with video data.
+        Initialize a Video object from DuckDuckGo search data.
 
         Args:
-        video_data (dict): A dictionary containing video information.
+        search_data (dict): A dictionary containing video search data.
         """
-        self.url = video_data.get('content')
-        self.video_id = self.extract_youtube_id(self.url)
-        self.description = video_data.get('description')
-        self.duration = video_data.get('duration')
-        self.published_date = parser.parse(video_data.get('published')).date()
-        self.publisher = video_data.get('publisher')
-        self.statistics = video_data.get('statistics')
-        self.title = video_data.get('title')
-        self.uploader = video_data.get('uploader')
-        self.transcript = None
+        video = cls()
+        video.url = search_data.get('content')
+        video.video_id = video.extract_youtube_id(video.url)
+        video.description = search_data.get('description')
+        video.duration = search_data.get('duration')
+        video.published_date = parser.parse(search_data.get('published')).date() if search_data.get('published') else None
+        video.publisher = search_data.get('publisher')
+        video.statistics = search_data.get('statistics')
+        video.title = search_data.get('title')
+        video.uploader = search_data.get('uploader')
+        return video
+
+    @classmethod
+    def from_json_data(cls, json_data):
+        """
+        Initialize a Video object from JSON data (deserialization).
+
+        Args:
+        json_data (dict): A dictionary containing video data in JSON format.
+        """
+        video = cls()
+        video.__dict__.update(json_data)
+        return video
 
     @staticmethod
     def extract_youtube_id(url):

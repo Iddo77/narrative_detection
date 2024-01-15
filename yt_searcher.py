@@ -28,7 +28,7 @@ def search_videos(search_term: str, start_date: datetime, max_results=300):
         for r in ddgs_videos_gen:
             published_date = parser.parse(r['published'])
             if published_date >= start_date and r['publisher'] == 'YouTube' and r['description']:
-                yield Video(r)
+                yield Video.from_search_data(r)
 
 
 if __name__ == '__main__':
