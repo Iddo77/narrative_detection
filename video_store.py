@@ -49,6 +49,14 @@ class VideoStore:
             return True
         return False
 
+    def update_transcripts(self):
+        """
+        Updates the transcripts for all videos in the store where it's None.
+        """
+        for video in self._videos.values():
+            if video.transcript is None:
+                video.fetch_transcript()
+
     def serialize(self) -> str:
         """
         Serializes the video store to a JSON string.

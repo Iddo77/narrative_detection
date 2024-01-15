@@ -23,6 +23,7 @@ def search_videos(search_term: str, start_date: datetime, max_results=300):
         ddgs_videos_gen = ddgs.videos(
             search_term,
             safesearch="off",
+            duration="medium",  # exclude shorts; longer videos are rare anyway, so no problem they are excluded as well
             max_results=max_results,
         )
         for r in ddgs_videos_gen:

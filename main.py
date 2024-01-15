@@ -19,6 +19,9 @@ def main():
     for v in videos:
         video_store.add_video(v)
 
+    # Update transcripts for all videos in the store
+    video_store.update_transcripts()
+
     videos_json = video_store.serialize()
     write_to_file(json_path, videos_json)
 

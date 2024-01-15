@@ -1,5 +1,6 @@
-from dateutil import parser
 import re
+from dateutil import parser
+from youtube_transcript_api import YouTubeTranscriptApi
 
 
 class Video:
@@ -48,6 +49,19 @@ class Video:
         return video
 
     @staticmethod
+    def is_youtube_video(url: str) -> bool:
+        """
+        Checks if the given URL is a YouTube video URL.
+
+        Args:
+        url (str): The video URL.
+
+        Returns:
+        bool: True if the URL is a YouTube URL, False otherwise.
+        """
+        return 'youtube' in url or 'youtu.be' in url
+
+    @staticmethod
     def extract_youtube_id(url):
         """
         Extracts the YouTube video ID from the URL if it's a YouTube URL.
@@ -59,10 +73,24 @@ class Video:
         Returns:
         str: The YouTube video ID or the original URL.
         """
-        if 'youtube' in url or 'youtu.be' in url:
+        if Video.is_youtube_video(url):
             match = re.search(r'(?:v=|/)([0-9A-Za-z_-]{11})', url)
             return match.group(1) if match else url
         return url
+
+    def fetch_transcript(self):
+        """
+        Fetches the transcript for the video and updates the transcript attribute.
+        If fetching fails, sets the transcript to an empty string.
+        """
+        if self.is_youtube_video(self.url):
+            try:
+                transcript_list = YouTubeTranscriptApi.get_transcript(self.video_id)
+                self.transcript = ' '.join([entry['text'] for entry in transcript_list])
+            except Exception:
+                self.transcript = ""
+        else:
+            self.transcript = ""
 
     def __repr__(self):
         return f"Video(title='{self.title}', uploader='{self.uploader}', published_date='{self.published_date}')"
