@@ -2,6 +2,8 @@ from duckduckgo_search import DDGS
 from datetime import datetime
 from dateutil import parser
 
+from video import Video
+
 
 def search_videos(search_term: str, start_date: datetime, max_results=300):
     """
@@ -26,7 +28,7 @@ def search_videos(search_term: str, start_date: datetime, max_results=300):
         for r in ddgs_videos_gen:
             published_date = parser.parse(r['published'])
             if published_date >= start_date and r['publisher'] == 'YouTube' and r['description']:
-                yield r
+                yield Video(r)
 
 
 if __name__ == '__main__':
