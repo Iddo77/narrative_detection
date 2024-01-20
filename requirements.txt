@@ -7,3 +7,6 @@ lxml>=5.1.0
 pycparser>=2.21
 python-dateutil>=2.8.2
 six>=1.16.0
+
+marvin~=2.1.2
+langchain~=0.1.0

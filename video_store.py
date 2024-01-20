@@ -60,23 +60,26 @@ class VideoStore:
     def serialize(self) -> str:
         """
         Serializes the video store to a JSON string.
-
-        Returns:
-        str: JSON string representation of the video store.
         """
-        return json.dumps({vid: vars(self._videos[vid]) for vid in self._videos}, default=str)
+        # Convert Video objects to dictionaries, converting sets to lists
+        video_data = {vid: self._convert_video_to_dict(video) for vid, video in self._videos.items()}
+        return json.dumps(video_data)
 
-    def deserialize(self, json_string):
+    @staticmethod
+    def _convert_video_to_dict(video: Video) -> dict:
+        video_dict = vars(video)
+        video_dict['narratives'] = list(video.narratives)  # Convert set to list
+        return video_dict
+
+    def deserialize(self, json_string: str):
         """
         Deserializes a JSON string to populate the video store.
-
-        Args:
-        json_string (str): JSON string representation of the video store.
         """
         video_data = json.loads(json_string)
-        for vid in video_data:
-            video = Video.from_json_data(video_data[vid])
-            self.add_video(video)
+        for vid, data in video_data.items():
+            video = Video.from_json_data(data)
+            video.narratives = set(data['narratives'])  # Convert list to set
+            self._videos[vid] = video
 
     def __repr__(self) -> str:
         return f"VideoStore with {len(self._videos)} videos"

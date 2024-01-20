@@ -15,6 +15,7 @@ class Video:
         self.title = None
         self.uploader = None
         self.transcript = None
+        self.narratives = set()
 
     @classmethod
     def from_search_data(cls, search_data):
