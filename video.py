@@ -1,24 +1,25 @@
 import re
+from datetime import date
+
 from dateutil import parser
 from youtube_transcript_api import YouTubeTranscriptApi
 
 
 class Video:
     def __init__(self):
-        self.url = None
-        self.video_id = None
-        self.description = None
-        self.duration = None
-        self.published_date = None
-        self.publisher = None
-        self.statistics = None
-        self.title = None
-        self.uploader = None
-        self.transcript = None
-        self.narratives = set()
+        self.url: str | None = None
+        self.video_id: str | None = None
+        self.description: str | None = None
+        self.duration: str | None = None
+        self.published_date: date | None = None
+        self.publisher: str | None = None
+        self.statistics: dict | None = None
+        self.title: str | None = None
+        self.uploader: str | None = None
+        self.transcript: str | None = None
 
     @classmethod
-    def from_search_data(cls, search_data):
+    def from_search_data(cls, search_data: dict) -> 'Video':
         """
         Initialize a Video object from DuckDuckGo search data.
 
@@ -38,7 +39,7 @@ class Video:
         return video
 
     @classmethod
-    def from_json_data(cls, json_data):
+    def from_json_data(cls, json_data: dict) -> 'Video':
         """
         Initialize a Video object from JSON data (deserialization).
 
@@ -63,7 +64,7 @@ class Video:
         return 'youtube' in url or 'youtu.be' in url
 
     @staticmethod
-    def extract_youtube_id(url):
+    def extract_youtube_id(url: str) -> str:
         """
         Extracts the YouTube video ID from the URL if it's a YouTube URL.
         Returns the original URL otherwise.
@@ -79,7 +80,7 @@ class Video:
             return match.group(1) if match else url
         return url
 
-    def fetch_transcript(self):
+    def fetch_transcript(self) -> None:
         """
         Fetches the transcript for the video and updates the transcript attribute.
         If fetching fails, sets the transcript to an empty string.
@@ -93,5 +94,5 @@ class Video:
         else:
             self.transcript = ""
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Video(title='{self.title}', uploader='{self.uploader}', published_date='{self.published_date}')"

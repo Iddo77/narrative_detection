@@ -1,47 +1,36 @@
 import os
 from datetime import datetime
 
+from content_manager import ContentManager
 from marvin_ai import extract_narratives
-from narrative_store import NarrativeStore
 from utils import write_to_file, read_from_file
-from video import Video
-from video_store import VideoStore
 from yt_searcher import search_videos
 
 
 def main():
     start_date_ = datetime(2023, 10, 7)
-    video_store = VideoStore()
-    narrative_store = NarrativeStore()
+    content_manager = ContentManager()
 
-    videos_json_path = './data/videos.json'
-    if os.path.exists(videos_json_path):
-        videos_json = read_from_file(videos_json_path)
-        video_store.deserialize(videos_json)
+    json_path = './data/content.json'
+    if os.path.exists(json_path):
+        content_json = read_from_file(json_path)
+        content_manager.deserialize(content_json)
 
-    narratives_json_path = './data/narratives.json'
-    if os.path.exists(narratives_json_path):
-        narratives_json = read_from_file(narratives_json_path)
-        narrative_store.deserialize(narratives_json)
-
-    videos = search_videos('Palestine', start_date_)  # TODO move searching and getting transcripts and narratives to separate function
+    videos = search_videos('Palestine', start_date_, max_results=3)  # TODO move searching and getting transcripts and narratives to separate function
     for v in videos:
-        if not video_store.get_video(v.video_id):  # TODO make this line more readable
+        if not content_manager.contains_video(v):
             v.fetch_transcript()
-            for narrative_description in extract_narratives(v.transcript):
-                narrative = narrative_store.create_narrative(narrative_description)
-                narrative.add_video(v.video_id)
-                v.narratives.add(narrative)
-            video_store.add_video(v)
+            if v.transcript:  # skip videos without transcript
+                content_manager.add_video(v)
+                for narrative_description in extract_narratives(v.transcript):
+                    content_manager.create_video_narrative(v.video_id, narrative_description)
 
     # Update transcripts for all videos in the store
     # video_store.update_transcripts()
 
     # serialize
-    videos_json = video_store.serialize()
-    write_to_file(videos_json_path, videos_json)
-    narratives_json = narrative_store.serialize()
-    write_to_file(narratives_json_path, narratives_json)
+    content_json = content_manager.serialize()
+    write_to_file(json_path, content_json)
 
 
 if __name__ == '__main__':

@@ -1,14 +1,8 @@
 class Narrative:
-    def __init__(self, narrative_id: int, description: str):
-        self.narrative_id = narrative_id
-        self.description = description
-        self.search_term = None
-        self.video_ids = set()
-
-    def add_video(self, video_id: str):
-        self.video_ids.add(video_id)
+    def __init__(self, narrative_id: int, description: str, search_term=None):
+        self.narrative_id: int = narrative_id
+        self.description: str = description
+        self.search_term: str | None = search_term
 
     def __repr__(self):
-        return (f"Narrative(description='{self.description}', "
-                f"search_term='{self.search_term}', "
-                f"videos={len(self.video_ids)})")
+        return f"Narrative(description='{self.description}'"
