@@ -2,6 +2,7 @@ import json
 from datetime import date, datetime
 
 from narrative import Narrative
+from narrative_clusterer import NarrativeClusterer
 from video import Video
 
 
@@ -12,6 +13,7 @@ class ContentManager:
         self.video_to_narratives = {}  # Maps video IDs to sets of narrative IDs
         self.narrative_to_videos = {}  # Maps narrative IDs to sets of video IDs
         self.next_narrative_id = 1  # Auto-incrementing ID for Narratives
+        self.narrative_clusterer = NarrativeClusterer()
 
     def add_video(self, video: Video) -> bool:
         if not self.contains_video(video):
@@ -59,6 +61,21 @@ class ContentManager:
 
     def get_narratives_for_video(self, video_id: str):
         return [self.get_narrative(narrative_id) for narrative_id in self.video_to_narratives.get(video_id, set())]
+
+    def cluster_and_merge_narratives(self):
+        """
+        Clusters and merges narratives using the NarrativeClusterer.
+        """
+        narratives = set(self.narratives.values())
+        clusters = self.narrative_clusterer.cluster_narratives(narratives)
+
+        # Example merging process
+        for cluster in clusters:
+            # TODO implement
+            # merge_narratives(cluster)
+            # a single narrative replaces the cluster -> replace all registration IDs of the narratives in the cluster with this ID
+            # make sure to set the search term of narratives to None so that it is recreated
+            pass
 
     def serialize(self) -> str:
         """

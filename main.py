@@ -77,7 +77,7 @@ def iterative_narrative_expansion(content_manager: ContentManager,
         max_results = 2 ** (current_depth + 2)  # 32, 16, 8 for 3 iterations
 
         if merge_flag:
-            merge_narratives(content_manager)  # Placeholder for merging function
+            content_manager.cluster_and_merge_narratives()
 
         search_and_process_videos(content_manager, current_search_term, start_date, max_results)
 
@@ -91,7 +91,7 @@ def iterative_narrative_expansion(content_manager: ContentManager,
 
     # Ensure narratives are merged after the final level of BFS
     if search_queue and search_queue[-1][2]:  # check the last merge_flag
-        merge_narratives(content_manager)
+        content_manager.cluster_and_merge_narratives()
 
 
 def search_and_process_videos(content_manager: ContentManager,
@@ -139,10 +139,6 @@ def process_video(content_manager: ContentManager, video, max_retries=1) -> bool
                 logging.error(f"Error processing video {video.url}: {e}", exc_info=True)
                 raise  # Reraise the exception after final attempt
     return False
-
-
-def merge_narratives(content_manager: ContentManager):
-    pass  # TODO implement; make sure to set the search term of narratives to None so that it is recreated
 
 
 if __name__ == '__main__':
