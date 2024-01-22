@@ -48,6 +48,7 @@ The text below is a narrative found in YouTube videos about the Israel-Hamas con
 
 ### INSTRUCTIONS
 Create a search term for use with DuckDuckGo Search to find more similar videos for the narrative.
+Only use words from the given narrative or derivatives of those words. Use at most 5 words.
 
 ### OUTPUT FORMAT
 Respond with a single string containing the search term, and nothing else.

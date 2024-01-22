@@ -84,9 +84,10 @@ def iterative_narrative_expansion(content_manager: ContentManager,
         if current_depth > 0:
             narratives = list(content_manager.narratives.values())
             for idx, narrative in enumerate(narratives):
-                narrative_search_term = create_search_term(narrative.description)  # Placeholder for search term creation
+                if not narrative.search_term:
+                    narrative.search_term = create_search_term(narrative.description)
                 merge_flag = idx == len(narratives) - 1  # Set merge_flag to True for the last narrative
-                search_queue.append((narrative_search_term, current_depth - 1, merge_flag))
+                search_queue.append((narrative.search_term, current_depth - 1, merge_flag))
 
     # Ensure narratives are merged after the final level of BFS
     if search_queue and search_queue[-1][2]:  # check the last merge_flag
@@ -141,7 +142,7 @@ def process_video(content_manager: ContentManager, video, max_retries=1) -> bool
 
 
 def merge_narratives(content_manager: ContentManager):
-    pass  # TODO implement
+    pass  # TODO implement; make sure to set the search term of narratives to None so that it is recreated
 
 
 if __name__ == '__main__':
