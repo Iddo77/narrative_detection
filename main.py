@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 
 from content_manager import ContentManager
-from marvin_ai import extract_narratives
+from marvin_ai import extract_narratives, create_search_term
 from utils import write_to_file, read_from_file
 from yt_searcher import search_videos
 
@@ -17,8 +17,14 @@ logging.basicConfig(
 )
 
 
+class MaxSkipsReachedException(Exception):
+    """Exception raised when the maximum number of consecutive skips is reached."""
+    pass
+
+
+
 def main():
-    start_date_ = datetime(2023, 10, 7)
+    start_date = datetime(2023, 10, 7)
     content_manager = ContentManager()
     logging.info("ContentManager initialized")
 
@@ -27,50 +33,115 @@ def main():
         content_json = read_from_file(json_path)
         content_manager.deserialize(content_json)
 
-    search_and_process_videos(content_manager, 'Palestine', start_date_, max_results=100)
+    narrative_count = len(content_manager.narratives)
+    video_count = len(content_manager.videos)
+
+    try:
+        iterative_narrative_expansion(content_manager,
+                                      "Palestine",
+                                      start_date,
+                                      max_iterations=3,
+                                      max_total_videos=500)
+    except Exception as e:
+        logging.error(f"Searching and processing videos is interrupted: {e}",
+                        exc_info=True)
 
     # serialize
-    content_json = content_manager.serialize()
-    write_to_file(json_path, content_json)
+    if len(content_manager.narratives) != narrative_count or len(content_manager.videos) != video_count:
+        content_json = content_manager.serialize()
+        write_to_file(json_path, content_json)
+
+
+def iterative_narrative_expansion(content_manager: ContentManager,
+                                  initial_search_term: str,
+                                  start_date: datetime,
+                                  max_iterations: int,
+                                  max_total_videos: int):
+    """
+    Iteratively expands the search for videos based on narratives using a BFS approach.
+    Narratives are merged after completing each BFS level.
+
+    Args:
+    content_manager (ContentManager): The content manager instance.
+    initial_search_term (str): The initial search term for videos.
+    start_date (datetime): The starting date for video search.
+    max_iterations (int): Maximum number of iterations for the BFS loop.
+    max_total_videos (int): Maximum total number of videos to process.
+    """
+    search_queue = [(initial_search_term, max_iterations, True)]
+
+    while search_queue and len(content_manager.videos) < max_total_videos:
+        current_search_term, current_depth, merge_flag = search_queue.pop(0)
+
+        # Calculate max_results based on the current depth
+        max_results = 2 ** (current_depth + 2)  # 32, 16, 8 for 3 iterations
+
+        if merge_flag:
+            merge_narratives(content_manager)  # Placeholder for merging function
+
+        search_and_process_videos(content_manager, current_search_term, start_date, max_results)
+
+        if current_depth > 0:
+            narratives = list(content_manager.narratives.values())
+            for idx, narrative in enumerate(narratives):
+                narrative_search_term = create_search_term(narrative.description)  # Placeholder for search term creation
+                merge_flag = idx == len(narratives) - 1  # Set merge_flag to True for the last narrative
+                search_queue.append((narrative_search_term, current_depth - 1, merge_flag))
+
+    # Ensure narratives are merged after the final level of BFS
+    if search_queue and search_queue[-1][2]:  # check the last merge_flag
+        merge_narratives(content_manager)
 
 
 def search_and_process_videos(content_manager: ContentManager,
                               search_term: str,
                               start_date: datetime,
-                              max_results: int) -> None:
+                              max_results: int,
+                              max_skips: int = 3) -> None:
     videos = search_videos(search_term, start_date, max_results)
+    consecutive_skips = 0
+
     for video in videos:
         if not content_manager.contains_video(video):
-            process_video(content_manager, video)
+            try:
+                if process_video(content_manager, video):
+                    consecutive_skips = 0  # Reset skip count on success
+                # Else: video is skipped because transcript is missing -> consecutive_skips stays the same
+            except Exception:
+                consecutive_skips += 1  # Increment skip count on processing failure
+                if consecutive_skips == max_skips:
+                    raise MaxSkipsReachedException(f"{max_skips} consecutive videos are skipped due to errors. "
+                                                   f"Stopping video processing.")
 
 
-def process_video(content_manager: ContentManager, video, max_retries=1, max_skips=3):
+def process_video(content_manager: ContentManager, video, max_retries=1) -> bool:
     """
     Processes a single video, extracting narratives and linking them to the video.
-    """
-    consecutive_skips = 0
-    last_exception = None
 
-    for _ in range(max_retries + 1):
+    Returns:
+    bool: True if the video was processed successfully, False otherwise.
+    """
+    for attempt in range(max_retries + 1):
         try:
             video.fetch_transcript()
             if not video.transcript:
                 logging.info(f"Video {video.video_id} has no transcript and is skipped.")
-                return
+                return False
 
             content_manager.add_video(video)
             for narrative_description in extract_narratives(video.transcript):
                 content_manager.create_video_narrative(video.video_id, narrative_description)
 
-            consecutive_skips = 0
-            break
+            return True  # Successfully processed
         except Exception as e:
-            consecutive_skips += 1
-            last_exception = e
-            logging.error(f"Error processing video {video.video_id}: {e}", exc_info=True)
-            if consecutive_skips >= max_skips:
-                logging.warning(f"Skipped video {video.video_id} after {consecutive_skips} failures: {last_exception}")
-                raise last_exception
+            if attempt == max_retries:
+                logging.error(f"Error processing video {video.url}: {e}", exc_info=True)
+                raise  # Reraise the exception after final attempt
+    return False
+
+
+def merge_narratives(content_manager: ContentManager):
+    pass  # TODO implement
 
 
 if __name__ == '__main__':

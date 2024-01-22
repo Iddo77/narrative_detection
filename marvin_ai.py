@@ -3,6 +3,9 @@ import marvin
 from utils import read_from_file
 
 
+marvin.settings.openai.chat.completions.model = 'gpt-3.5-turbo-16k'
+
+
 def check_settings():
     print(f"OpenAI model: {marvin.settings.openai.chat.completions.model}")
 
@@ -32,6 +35,22 @@ Analyze the text above and divide it into distinct narratives. Provide a brief s
 
 ### OUTPUT FORMAT
 Respond as a list of strings, one for each narrative.
+"""
+
+
+@marvin.fn
+def create_search_term(narrative: str) -> list[str]:
+    """### CONTEXT
+The text below is a narrative found in YouTube videos about the Israel-Hamas conflict that started on 7 October 2023:
+---
+`narrative`
+---
+
+### INSTRUCTIONS
+Create a search term for use with DuckDuckGo Search to find more similar videos for the narrative.
+
+### OUTPUT FORMAT
+Respond with a single string containing the search term, and nothing else.
 """
 
 
