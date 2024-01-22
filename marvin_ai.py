@@ -37,6 +37,21 @@ Analyze the text above and divide it into distinct narratives. Provide a brief s
 Respond as a list of strings, one for each narrative.
 """
 
+@marvin.fn
+def merge_narratives(narratives: list[str]) -> str:
+    """### CONTEXT
+The texts below are similar narratives found in YouTube videos about the Israel-Hamas conflict that started on 7 October 2023:
+---
+`narrative`
+---
+
+### INSTRUCTIONS
+Merge these narratives into a single coherent narrative of maximum 100 words.
+
+### OUTPUT FORMAT
+Respond with a single string containing the narrative, and nothing else.
+"""
+
 
 @marvin.fn
 def create_search_term(narrative: str) -> list[str]:

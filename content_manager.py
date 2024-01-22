@@ -1,6 +1,7 @@
 import json
 from datetime import date, datetime
 
+from marvin_ai import merge_narratives
 from narrative import Narrative
 from narrative_clusterer import NarrativeClusterer
 from video import Video
@@ -62,6 +63,12 @@ class ContentManager:
     def get_narratives_for_video(self, video_id: str):
         return [self.get_narrative(narrative_id) for narrative_id in self.video_to_narratives.get(video_id, set())]
 
+    def remove_narrative(self, narrative_id: int):
+        for video in self.get_videos_for_narrative(narrative_id):
+            self.video_to_narratives[video.video_id].remove(narrative_id)
+        del self.narratives[narrative_id]
+        del self.narrative_to_videos[narrative_id]
+
     def cluster_and_merge_narratives(self):
         """
         Clusters and merges narratives using the NarrativeClusterer.
@@ -69,13 +76,19 @@ class ContentManager:
         narratives = set(self.narratives.values())
         clusters = self.narrative_clusterer.cluster_narratives(narratives)
 
-        # Example merging process
+        # merge each cluster into a new narrative
         for cluster in clusters:
-            # TODO implement
-            # merge_narratives(cluster)
-            # a single narrative replaces the cluster -> replace all registration IDs of the narratives in the cluster with this ID
-            # make sure to set the search term of narratives to None so that it is recreated
-            pass
+            # merge and create new narrative
+            narrative_descriptions = [narr.description for narr in cluster]
+            new_narrative_description = merge_narratives(narrative_descriptions)
+            new_narrative = Narrative(self.next_narrative_id, new_narrative_description)
+            self.next_narrative_id += 1
+            # link new narrative and remove old narratives
+            for narr in cluster:
+                videos = self.get_videos_for_narrative(narr.narrative_id)
+                for video in videos:
+                    self.link_video_narrative(video.video_id, new_narrative.narrative_id)
+                self.remove_narrative(narr.narrative_id)
 
     def serialize(self) -> str:
         """
