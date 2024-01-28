@@ -66,6 +66,7 @@ def iterative_narrative_expansion(content_manager: ContentManager,
     max_iterations (int): Maximum number of iterations for the BFS loop.
     max_total_videos (int): Maximum total number of videos to process.
     """
+    iteration = 1
     search_queue = [(initial_search_term, max_iterations, True)]
 
     while search_queue and len(content_manager.videos) < max_total_videos:
@@ -73,29 +74,34 @@ def iterative_narrative_expansion(content_manager: ContentManager,
 
         # Calculate max_results based on the current depth
         max_results = 2 ** (current_depth + 2)  # 32, 16, 8 for 3 iterations
-        content_manager.iteration = max_iterations - current_depth + 1
 
-        search_and_process_videos(content_manager, current_search_term, start_date, max_results)
+        search_and_process_videos(content_manager, current_search_term, start_date, iteration, max_results)
+
+        # for the first iteration, the search term of the narratives to the initial search term
+        if iteration == 1:
+            for narrative in content_manager.narratives.values():
+                if narrative.iteration == 1:
+                    narrative.search_term = initial_search_term
 
         if merge_flag:
-            content_manager.cluster_and_merge_narratives()
+            new_narratives = content_manager.cluster_and_merge_narratives(iteration, iteration)
+            iteration += 1
+            if iteration > max_iterations:
+                break
 
-        if current_depth > 0:
-            narratives = list(content_manager.narratives.values())
-            for idx, narrative in enumerate(narratives):
-                if narrative.based_on and not narrative.search_term:
-                    narrative.search_term = create_search_term(narrative.description)
-                merge_flag = idx == len(narratives) - 1  # Set merge_flag to True for the last narrative
+            for idx, narrative in enumerate(new_narratives):
+                narrative.search_term = create_search_term(narrative.description)
+                merge_flag = idx == len(new_narratives) - 1  # Set merge_flag to True for the last narrative
                 search_queue.append((narrative.search_term, current_depth - 1, merge_flag))
 
-    # Ensure narratives are merged after the final level of BFS
-    if search_queue and search_queue[-1][2]:  # check the last merge_flag
-        content_manager.cluster_and_merge_narratives()
+    # do a final merge of all narratives except the first iteration
+    content_manager.cluster_and_merge_narratives(2, iteration)
 
 
 def search_and_process_videos(content_manager: ContentManager,
                               search_term: str,
                               start_date: datetime,
+                              iteration: int,
                               max_results: int,
                               max_skips: int = 3) -> None:
     videos = search_videos(search_term, start_date, max_results)
@@ -104,7 +110,7 @@ def search_and_process_videos(content_manager: ContentManager,
     for video in videos:
         if not content_manager.contains_video(video):
             try:
-                if process_video(content_manager, video):
+                if process_video(content_manager, video, iteration):
                     consecutive_skips = 0  # Reset skip count on success
                 # Else: video is skipped because transcript is missing -> consecutive_skips stays the same
             except Exception:
@@ -114,7 +120,7 @@ def search_and_process_videos(content_manager: ContentManager,
                                                    f"Stopping video processing.")
 
 
-def process_video(content_manager: ContentManager, video, max_retries=1) -> bool:
+def process_video(content_manager: ContentManager, video, iteration, max_retries=1) -> bool:
     """
     Processes a single video, extracting narratives and linking them to the video.
 
@@ -130,7 +136,7 @@ def process_video(content_manager: ContentManager, video, max_retries=1) -> bool
 
             content_manager.add_video(video)
             for narrative_description in extract_narratives(video.transcript):
-                content_manager.create_video_narrative(video.video_id, narrative_description)
+                content_manager.create_video_narrative(video.video_id, narrative_description, iteration)
 
             return True  # Successfully processed
         except Exception as e:

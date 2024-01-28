@@ -13,7 +13,6 @@ class ContentManager:
         self.video_to_narratives = {}  # Maps video IDs to sets of narrative IDs
         self.narrative_to_videos = {}  # Maps narrative IDs to sets of video IDs
         self.next_narrative_id = 1  # Auto-incrementing ID for Narratives
-        self.iteration = 0
 
     def add_video(self, video: Video) -> bool:
         if not self.contains_video(video):
@@ -24,7 +23,7 @@ class ContentManager:
     def contains_video(self, video: Video) -> bool:
         return video.video_id in self.videos
 
-    def create_video_narrative(self, video_id: str, narrative_description: str) -> Narrative:
+    def create_video_narrative(self, video_id: str, narrative_description: str, iteration: int) -> Narrative:
         """
         Creates a Narrative object with a given description, assigns an ID to it, registers it in the
         NarrativeStore, and links it to the specified video.
@@ -32,12 +31,13 @@ class ContentManager:
         Args:
         video_id (str): The ID of the video to link the narrative to.
         narrative_description (str): The description of the narrative.
+        iteration (int): The current search iteration during which the narrative was created.
 
         Returns:
         Narrative: The created Narrative object.
         """
         # Create and set up the Narrative object
-        narrative = Narrative(self.next_narrative_id, narrative_description, self.iteration)
+        narrative = Narrative(self.next_narrative_id, narrative_description, iteration)
         self.next_narrative_id += 1
 
         # Register the narrative and link it with the video
@@ -68,26 +68,30 @@ class ContentManager:
         del self.narratives[narrative_id]
         del self.narrative_to_videos[narrative_id]
 
-    def cluster_and_merge_narratives(self):
+    def cluster_and_merge_narratives(self, start_iteration: int, end_iteration: int) -> list[Narrative]:
         """
         Clusters and merges narratives using an LLM.
         """
+        result = []
         narrative_id_desc_map = {n.narrative_id: n.description for n in self.narratives.values()
-                                 if n.iteration == self.iteration}
+                                 if start_iteration <= n.iteration <= end_iteration}
         clusters = cluster_narratives(narrative_id_desc_map)
 
         # merge each cluster into a new narrative
         for description, based_on in clusters:
-            new_narrative = Narrative(self.next_narrative_id, description, self.iteration)
+            new_narrative = Narrative(self.next_narrative_id, description, end_iteration + 1)
             new_narrative.based_on = based_on
             self.narratives[new_narrative.narrative_id] = new_narrative
             self.next_narrative_id += 1
+            result.append(new_narrative)
 
             # link new narrative and remove old narratives
             for narrative_id in based_on:
                 videos = self.get_videos_for_narrative(narrative_id)
                 for video in videos:
                     self.link_video_narrative(video.video_id, new_narrative.narrative_id)
+
+        return result
 
     def serialize(self) -> str:
         """
@@ -118,11 +122,12 @@ class ContentManager:
             self.videos[vid] = video
 
         # Reconstruct Narrative objects
-        self.narratives = {nid: Narrative(**n_data) for nid, n_data in data["narratives"].items()}
+        self.narratives = {int(nid): Narrative(**n_data) for nid, n_data in data["narratives"].items()}
 
         # Restore relationships
         self.video_to_narratives = data["video_to_narratives"]
-        self.narrative_to_videos = data["narrative_to_videos"]
+        self.narrative_to_videos = {int(nid): [v_list] if isinstance(v_list, str) else v_list
+                                    for nid, v_list in data["narrative_to_videos"].items()}
 
         # Restore the next narrative ID
         self.next_narrative_id = data["next_narrative_id"]
