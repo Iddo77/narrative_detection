@@ -1,7 +1,7 @@
 import json
 from datetime import date, datetime
 
-from marvin_ai import cluster_narratives
+from narrative_clustering import cluster_narratives
 from narrative import Narrative
 from video import Video
 
