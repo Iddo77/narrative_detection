@@ -22,7 +22,6 @@ class MaxSkipsReachedException(Exception):
     pass
 
 
-
 def main():
     start_date = datetime(2023, 10, 7)
     content_manager = ContentManager()
@@ -43,8 +42,7 @@ def main():
                                       max_iterations=3,
                                       max_total_videos=500)
     except Exception as e:
-        logging.error(f"Searching and processing videos is interrupted: {e}",
-                        exc_info=True)
+        logging.error(f"Searching and processing videos is interrupted: {e}", exc_info=True)
 
     # serialize
     if len(content_manager.narratives) != narrative_count or len(content_manager.videos) != video_count:
@@ -75,11 +73,12 @@ def iterative_narrative_expansion(content_manager: ContentManager,
 
         # Calculate max_results based on the current depth
         max_results = 2 ** (current_depth + 2)  # 32, 16, 8 for 3 iterations
+        content_manager.iteration = max_iterations - current_depth + 1
+
+        search_and_process_videos(content_manager, current_search_term, start_date, max_results)
 
         if merge_flag:
             content_manager.cluster_and_merge_narratives()
-
-        search_and_process_videos(content_manager, current_search_term, start_date, max_results)
 
         if current_depth > 0:
             narratives = list(content_manager.narratives.values())

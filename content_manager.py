@@ -1,9 +1,8 @@
 import json
 from datetime import date, datetime
 
-from marvin_ai import merge_narratives
+from marvin_ai import cluster_narratives
 from narrative import Narrative
-from narrative_clusterer import NarrativeClusterer
 from video import Video
 
 
@@ -14,7 +13,7 @@ class ContentManager:
         self.video_to_narratives = {}  # Maps video IDs to sets of narrative IDs
         self.narrative_to_videos = {}  # Maps narrative IDs to sets of video IDs
         self.next_narrative_id = 1  # Auto-incrementing ID for Narratives
-        self.narrative_clusterer = NarrativeClusterer()
+        self.iteration = 0
 
     def add_video(self, video: Video) -> bool:
         if not self.contains_video(video):
@@ -38,7 +37,7 @@ class ContentManager:
         Narrative: The created Narrative object.
         """
         # Create and set up the Narrative object
-        narrative = Narrative(self.next_narrative_id, narrative_description)
+        narrative = Narrative(self.next_narrative_id, narrative_description, self.iteration)
         self.next_narrative_id += 1
 
         # Register the narrative and link it with the video
@@ -71,24 +70,23 @@ class ContentManager:
 
     def cluster_and_merge_narratives(self):
         """
-        Clusters and merges narratives using the NarrativeClusterer.
+        Clusters and merges narratives using an LLM.
         """
-        narratives = set(self.narratives.values())
-        clusters = self.narrative_clusterer.cluster_narratives(narratives)
+        narrative_id_desc_map = {n.narrative_id: n.description for n in self.narratives.values()}
+        clusters = cluster_narratives(narrative_id_desc_map)
 
         # merge each cluster into a new narrative
-        for cluster in clusters:
-            # merge and create new narrative
-            narrative_descriptions = [narr.description for narr in cluster]
-            new_narrative_description = merge_narratives(narrative_descriptions)
-            new_narrative = Narrative(self.next_narrative_id, new_narrative_description)
+        for description, based_on in clusters:
+            new_narrative = Narrative(self.next_narrative_id, description, self.iteration)
+            new_narrative.based_on = based_on
+            self.narratives[new_narrative.narrative_id] = new_narrative
             self.next_narrative_id += 1
+
             # link new narrative and remove old narratives
-            for narr in cluster:
-                videos = self.get_videos_for_narrative(narr.narrative_id)
+            for narrative_id in based_on:
+                videos = self.get_videos_for_narrative(narrative_id)
                 for video in videos:
                     self.link_video_narrative(video.video_id, new_narrative.narrative_id)
-                self.remove_narrative(narr.narrative_id)
 
     def serialize(self) -> str:
         """

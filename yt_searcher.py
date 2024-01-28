@@ -5,7 +5,7 @@ from dateutil import parser
 from video import Video
 
 
-def search_videos(search_term: str, start_date: datetime, max_results=300):
+def search_videos(search_term: str, start_date: datetime, max_results: int):
     """
     Generator function to search for videos based on a search term, starting from a specified date.
     Yields a dictionary of video information if the video is published by YouTube, has a description,
@@ -34,6 +34,6 @@ def search_videos(search_term: str, start_date: datetime, max_results=300):
 
 if __name__ == '__main__':
     start_date_ = datetime(2023, 10, 7)
-    videos = search_videos('Palestine', start_date_)
+    videos = search_videos('Palestine', start_date_, 10)
     for v in videos:
         print(v)

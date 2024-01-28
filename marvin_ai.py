@@ -61,6 +61,23 @@ Only use words from the given narrative or derivatives of those words. Use at mo
 Respond with a single string containing the search term, and nothing else.
 """
 
+@marvin.fn
+def cluster_narratives(narrative_id_desc_map: dict[int, str]) -> list[tuple[str, list[int]]]:
+    """### CONTEXT
+The texts in the dict below are summaries of narratives  about the Israel-Hamas conflict that started on 7 October 2023 taken from YouTube transcripts:
+---
+`str(narrative_id_desc_map)`
+---
+
+### OBJECTIVE
+Cluster these narratives in similar narratives and create a new narrative description for each cluster in max. 100 words each. Do NOT add new information that is not in the texts. Try the use exactly the same words as possible, while leaving out irrelevant details when necessary.
+
+### SPECIFICS
+When creating narratives, avoid using self-referential phrases or attributions like "claims the speaker", "according to the speaker", or any similar terms. Ensure that all statements are in active language and present tense. This is crucial for the accurate creation of triples in a knowledge graph. Avoid using past participles as they can lead to inaccuracies and inconsistencies in the data structure. The results will used to detect hate speech and disinformation in a knowledge graph. If you include passive language or self-referential phrases this will fail  and the disinformation might not be detected.
+
+### RESULT
+Respond as a list of tuples. Each tuple consists of the new narrative description and a list of narrative-IDs on which it is based. For example: [("description1", [1, 2]), ("description2", [3, 4])]
+"""
 
 if __name__ == '__main__':
     check_settings()
