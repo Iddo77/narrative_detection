@@ -72,7 +72,8 @@ class ContentManager:
         """
         Clusters and merges narratives using an LLM.
         """
-        narrative_id_desc_map = {n.narrative_id: n.description for n in self.narratives.values()}
+        narrative_id_desc_map = {n.narrative_id: n.description for n in self.narratives.values()
+                                 if n.iteration == self.iteration}
         clusters = cluster_narratives(narrative_id_desc_map)
 
         # merge each cluster into a new narrative

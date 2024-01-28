@@ -83,7 +83,7 @@ def iterative_narrative_expansion(content_manager: ContentManager,
         if current_depth > 0:
             narratives = list(content_manager.narratives.values())
             for idx, narrative in enumerate(narratives):
-                if not narrative.search_term:
+                if narrative.based_on and not narrative.search_term:
                     narrative.search_term = create_search_term(narrative.description)
                 merge_flag = idx == len(narratives) - 1  # Set merge_flag to True for the last narrative
                 search_queue.append((narrative.search_term, current_depth - 1, merge_flag))
