@@ -1,22 +1,26 @@
-import marvin
+import ast
+
+from langchain.chains import LLMChain
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts import PromptTemplate
+from langchain.schema import BaseOutputParser
 
 from utils import read_from_file
 
 
-marvin.settings.openai.chat.completions.model = 'gpt-4-1106-preview'
+class NarrativeExtractionOutputParser(BaseOutputParser):
+
+    def parse(self, input_string: str):
+        # Convert the string representation to a list of strings
+        data = ast.literal_eval(input_string)
+        return data
 
 
-def check_settings():
-    print(f"OpenAI model: {marvin.settings.openai.chat.completions.model}")
-
-
-@marvin.fn
 def extract_narratives(transcript: str) -> list[str]:
-    """
-### CONTEXT
+    prompt_text = """### CONTEXT
 The text below is a YouTube transcript  about the Israel-Hamas conflict that started on 7 October 2023:
 ---
-`transcript`
+{transcript}
 ---
 
 ### OBJECTIVE
@@ -29,41 +33,19 @@ When summarizing narratives, avoid using self-referential phrases or attribution
 Respond as a list of strings, one for each narrative in the format ["string1",  "string2"].
 """
 
-@marvin.fn
-def merge_narratives(narratives: list[str]) -> str:
-    """### CONTEXT
-The texts below are similar narratives found in YouTube videos about the Israel-Hamas conflict that started on 7 October 2023:
----
-`narrative`
----
+    prompt_template = PromptTemplate(
+        input_variables=["transcript"],
+        template=prompt_text
+    )
 
-### INSTRUCTIONS
-Merge these narratives into a single coherent narrative of maximum 100 words.
+    llm = ChatOpenAI(temperature=1, model_name='gpt-4-1106-preview', max_tokens=4000)
 
-### OUTPUT FORMAT
-Respond with a single string containing the narrative, and nothing else.
-"""
-
-
-@marvin.fn
-def create_search_term(narrative: str) -> list[str]:
-    """### CONTEXT
-The text below is a narrative found in YouTube videos about the Israel-Hamas conflict that started on 7 October 2023:
----
-`narrative`
----
-
-### INSTRUCTIONS
-Create a search term for use with DuckDuckGo Search to find more similar videos for the narrative.
-Only use words from the given narrative or derivatives of those words. Use at most 5 words.
-
-### OUTPUT FORMAT
-Respond with a single string containing the search term, and nothing else.
-"""
+    chain = LLMChain(llm=llm, prompt=prompt_template, output_parser=NarrativeExtractionOutputParser())
+    result = chain.invoke({"transcript": transcript})
+    return result["text"]
 
 
 if __name__ == '__main__':
-    check_settings()
     transcript_ = read_from_file('./data/example_transcript.txt')
     narratives = extract_narratives(transcript_)
     print(narratives)

@@ -3,7 +3,8 @@ import logging
 from datetime import datetime
 
 from content_manager import ContentManager
-from marvin_ai import extract_narratives, create_search_term
+from narrative_extraction import extract_narratives
+from search_term_creation import create_search_term
 from utils import write_to_file, read_from_file
 from yt_searcher import search_videos
 

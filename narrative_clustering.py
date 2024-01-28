@@ -52,5 +52,5 @@ Respond as a list of tuples. Each tuple consists of the new narrative descriptio
     llm = ChatOpenAI(temperature=1, model_name='gpt-4-1106-preview', max_tokens=4000)
 
     chain = LLMChain(llm=llm, prompt=prompt_template, output_parser=NarrativeClusteringOutputParser())
-    # chain_input = {'narrative_id_desc_map': str(narrative_id_desc_map)}
-    return chain.run(str(narrative_id_desc_map))
+    result = chain.invoke({"narrative_id_desc_map": (str(narrative_id_desc_map))})
+    return result["text"]
