@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 
 from content_manager import ContentManager
+from knowledge_graph import visualize_knowledge_graph
 from narrative_extraction import extract_narratives
 from search_term_creation import create_search_term
 from triples_extraction import extract_triples
@@ -172,7 +173,10 @@ def create_knowledge_graph(content_manager: ContentManager, create_if_exists: bo
     sorted_triples = sorted(all_triples, key=lambda x: ''.join(x))
     standardized_triples = standardize_triples(sorted_triples)
 
+    # same triples as text file
     write_to_file(kg_path, str(sorted(standardized_triples, key=lambda x: ''.join(x))))
+    # visualize graph in HTML
+    visualize_knowledge_graph(list(standardized_triples), './data/knowledge_graph.html')
 
 
 if __name__ == '__main__':
