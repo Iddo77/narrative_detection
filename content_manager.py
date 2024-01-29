@@ -23,7 +23,7 @@ class ContentManager:
     def contains_video(self, video: Video) -> bool:
         return video.video_id in self.videos
 
-    def create_video_narrative(self, video_id: str, narrative_description: str, iteration: int) -> Narrative:
+    def create_video_narrative(self, video_id: str, narrative_description: str, search_term: str, iteration: int) -> Narrative:
         """
         Creates a Narrative object with a given description, assigns an ID to it, registers it in the
         NarrativeStore, and links it to the specified video.
@@ -31,13 +31,14 @@ class ContentManager:
         Args:
         video_id (str): The ID of the video to link the narrative to.
         narrative_description (str): The description of the narrative.
+        search_term (str): the search term used to find the video
         iteration (int): The current search iteration during which the narrative was created.
 
         Returns:
         Narrative: The created Narrative object.
         """
         # Create and set up the Narrative object
-        narrative = Narrative(self.next_narrative_id, narrative_description, iteration)
+        narrative = Narrative(self.next_narrative_id, narrative_description, iteration, search_term)
         self.next_narrative_id += 1
 
         # Register the narrative and link it with the video

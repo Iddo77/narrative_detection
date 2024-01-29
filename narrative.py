@@ -6,5 +6,9 @@ class Narrative:
         self.iteration = iteration
         self.based_on: list[int] = based_on if based_on else []
 
+    @property
+    def is_merged(self) -> bool:
+        return bool(self.based_on)
+
     def __repr__(self):
         return f"Narrative(description='{self.description}'"

@@ -78,12 +78,6 @@ def iterative_narrative_expansion(content_manager: ContentManager,
 
         search_and_process_videos(content_manager, current_search_term, start_date, iteration, max_results)
 
-        # for the first iteration, the search term of the narratives to the initial search term
-        if iteration == 1:
-            for narrative in content_manager.narratives.values():
-                if narrative.iteration == 1:
-                    narrative.search_term = initial_search_term
-
         if merge_flag:
             new_narratives = content_manager.cluster_and_merge_narratives(iteration, iteration)
             iteration += 1
@@ -111,7 +105,7 @@ def search_and_process_videos(content_manager: ContentManager,
     for video in videos:
         if not content_manager.contains_video(video):
             try:
-                if process_video(content_manager, video, iteration):
+                if process_video(content_manager, video, search_term, iteration):
                     consecutive_skips = 0  # Reset skip count on success
                 # Else: video is skipped because transcript is missing -> consecutive_skips stays the same
             except Exception:
@@ -121,7 +115,7 @@ def search_and_process_videos(content_manager: ContentManager,
                                                    f"Stopping video processing.")
 
 
-def process_video(content_manager: ContentManager, video, iteration, max_retries=1) -> bool:
+def process_video(content_manager: ContentManager, video, search_term: str, iteration, max_retries=1) -> bool:
     """
     Processes a single video, extracting narratives and linking them to the video.
 
@@ -137,7 +131,7 @@ def process_video(content_manager: ContentManager, video, iteration, max_retries
 
             content_manager.add_video(video)
             for narrative_description in extract_narratives(video.transcript):
-                content_manager.create_video_narrative(video.video_id, narrative_description, iteration)
+                content_manager.create_video_narrative(video.video_id, narrative_description, search_term, iteration)
 
             return True  # Successfully processed
         except Exception as e:
