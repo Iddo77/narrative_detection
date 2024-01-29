@@ -69,18 +69,17 @@ class ContentManager:
         del self.narratives[narrative_id]
         del self.narrative_to_videos[narrative_id]
 
-    def cluster_and_merge_narratives(self, start_iteration: int, end_iteration: int) -> list[Narrative]:
+    def cluster_and_merge_narratives(self, narratives: list[Narrative], iteration: int) -> list[Narrative]:
         """
         Clusters and merges narratives using an LLM.
         """
         result = []
-        narrative_id_desc_map = {n.narrative_id: n.description for n in self.narratives.values()
-                                 if start_iteration <= n.iteration <= end_iteration}
+        narrative_id_desc_map = {n.narrative_id: n.description for n in narratives}
         clusters = cluster_narratives(narrative_id_desc_map)
 
         # merge each cluster into a new narrative
         for description, based_on in clusters:
-            new_narrative = Narrative(self.next_narrative_id, description, end_iteration + 1)
+            new_narrative = Narrative(self.next_narrative_id, description, iteration)
             new_narrative.based_on = based_on
             self.narratives[new_narrative.narrative_id] = new_narrative
             self.next_narrative_id += 1

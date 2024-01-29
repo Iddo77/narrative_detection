@@ -68,6 +68,7 @@ def iterative_narrative_expansion(content_manager: ContentManager,
     max_total_videos (int): Maximum total number of videos to process.
     """
     iteration = 1
+    searched = set()
     search_queue = [(initial_search_term, max_iterations, True)]
 
     while search_queue and len(content_manager.videos) < max_total_videos:
@@ -76,10 +77,13 @@ def iterative_narrative_expansion(content_manager: ContentManager,
         # Calculate max_results based on the current depth
         max_results = 2 ** (current_depth + 2)  # 32, 16, 8 for 3 iterations
 
-        search_and_process_videos(content_manager, current_search_term, start_date, iteration, max_results)
+        if current_search_term not in searched:
+            search_and_process_videos(content_manager, current_search_term, start_date, iteration, max_results)
+            searched.add(current_search_term)
 
         if merge_flag:
-            new_narratives = content_manager.cluster_and_merge_narratives(iteration, iteration)
+            narratives_to_merge = [n for n in content_manager.narratives.values() if n.iteration == iteration]
+            new_narratives = content_manager.cluster_and_merge_narratives(narratives_to_merge, iteration)
             iteration += 1
             if iteration > max_iterations:
                 break
@@ -89,8 +93,9 @@ def iterative_narrative_expansion(content_manager: ContentManager,
                 merge_flag = idx == len(new_narratives) - 1  # Set merge_flag to True for the last narrative
                 search_queue.append((narrative.search_term, current_depth - 1, merge_flag))
 
-    # do a final merge of all narratives except the first iteration
-    content_manager.cluster_and_merge_narratives(2, iteration)
+    # do a final merge of all merged narratives
+    narratives_to_merge = [n for n in content_manager.narratives.values() if n.is_merged]
+    content_manager.cluster_and_merge_narratives(narratives_to_merge, iteration)
 
 
 def search_and_process_videos(content_manager: ContentManager,
