@@ -3,11 +3,8 @@ import logging
 from datetime import datetime
 
 from content_manager import ContentManager
-from knowledge_graph import visualize_knowledge_graph
 from narrative_extraction import extract_narratives
 from search_term_creation import create_search_term
-from triples_extraction import extract_triples
-from triples_standardization import standardize_triples
 from utils import write_to_file, read_from_file
 from yt_searcher import search_videos
 
@@ -47,11 +44,6 @@ def main():
                                       max_total_videos=500)
     except Exception as e:
         logging.error(f"Searching and processing videos is interrupted: {e}", exc_info=True)
-
-    try:
-        create_knowledge_graph(content_manager, create_if_exists=False)
-    except Exception as e:
-        logging.error(f"Exception while creating a knowledge graph: {e}", exc_info=True)
 
     # serialize
     if len(content_manager.narratives) != narrative_count or len(content_manager.videos) != video_count:
@@ -152,31 +144,6 @@ def process_video(content_manager: ContentManager, video, search_term: str, iter
                 logging.error(f"Error processing video {video.url}: {e}", exc_info=True)
                 raise  # Reraise the exception after final attempt
     return False
-
-
-def create_knowledge_graph(content_manager: ContentManager, create_if_exists: bool):
-
-    kg_path = './data/knowledge_graph.txt'
-    if os.path.exists(kg_path) and not create_if_exists:
-        return False
-
-    # get the twice merged narratives (with iteration max_iterations + 1 = 4)
-    narratives = [n for n in content_manager.narratives.values() if n.iteration == 4]
-
-    # collect all triples
-    all_triples = set()
-    for narrative in narratives:
-        triples = extract_triples(narrative.description)
-        all_triples.update(triples)
-
-    # standardize triples
-    sorted_triples = sorted(all_triples, key=lambda x: ''.join(x))
-    standardized_triples = standardize_triples(sorted_triples)
-
-    # same triples as text file
-    write_to_file(kg_path, str(sorted(standardized_triples, key=lambda x: ''.join(x))))
-    # visualize graph in HTML
-    visualize_knowledge_graph(list(standardized_triples), './data/knowledge_graph.html')
 
 
 if __name__ == '__main__':
