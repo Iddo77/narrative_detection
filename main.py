@@ -2,6 +2,8 @@ import os
 import logging
 from datetime import datetime
 
+from tqdm import tqdm
+
 from content_manager import ContentManager
 from narrative_extraction import extract_narratives
 from search_term_creation import create_search_term
@@ -104,20 +106,22 @@ def search_and_process_videos(content_manager: ContentManager,
                               iteration: int,
                               max_results: int,
                               max_skips: int = 3) -> None:
-    videos = search_videos(search_term, start_date, max_results)
     consecutive_skips = 0
 
-    for video in videos:
-        if not content_manager.contains_video(video):
-            try:
-                if process_video(content_manager, video, search_term, iteration):
-                    consecutive_skips = 0  # Reset skip count on success
-                # Else: video is skipped because transcript is missing -> consecutive_skips stays the same
-            except Exception:
-                consecutive_skips += 1  # Increment skip count on processing failure
-                if consecutive_skips == max_skips:
-                    raise MaxSkipsReachedException(f"{max_skips} consecutive videos are skipped due to errors. "
-                                                   f"Stopping video processing.")
+    videos = search_videos(search_term, start_date, max_results)
+    new_videos = [video for video in videos if not content_manager.contains_video(video)]
+    print(f"Iteration: {iteration}. {len(new_videos)} new videos found.")
+
+    for video in tqdm(new_videos):
+        try:
+            if process_video(content_manager, video, search_term, iteration):
+                consecutive_skips = 0  # Reset skip count on success
+            # Else: video is skipped because transcript is missing -> consecutive_skips stays the same
+        except Exception:
+            consecutive_skips += 1  # Increment skip count on processing failure
+            if consecutive_skips == max_skips:
+                raise MaxSkipsReachedException(f"{max_skips} consecutive videos are skipped due to errors. "
+                                               f"Stopping video processing.")
 
 
 def process_video(content_manager: ContentManager, video, search_term: str, iteration, max_retries=1) -> bool:

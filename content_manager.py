@@ -48,8 +48,14 @@ class ContentManager:
         return narrative
 
     def link_video_narrative(self, video_id: str, narrative_id: int):
-        self.video_to_narratives[video_id] = narrative_id
-        self.narrative_to_videos[narrative_id] = video_id
+        if video_id in self.video_to_narratives:
+            self.video_to_narratives[video_id].append(narrative_id)
+        else:
+            self.video_to_narratives[video_id] = [narrative_id]
+        if narrative_id in self.narrative_to_videos:
+            self.narrative_to_videos[narrative_id].append(video_id)
+        else:
+            self.narrative_to_videos[narrative_id] =[video_id]
 
     def get_video(self, video_id: str) -> Video:
         return self.videos.get(video_id)
