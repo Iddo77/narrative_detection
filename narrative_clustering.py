@@ -1,4 +1,5 @@
 import ast
+import time
 
 from langchain.chains import LLMChain
 from langchain_openai import ChatOpenAI
@@ -35,10 +36,16 @@ The texts in the dict below are summaries of narratives  about the Israel-Hamas 
 ---
 
 ### OBJECTIVE
-Cluster these narratives in similar narratives and create a new narrative description for each cluster in max. 100 words each. Do NOT add new information that is not in the texts. Try the use exactly the same words as possible, while leaving out irrelevant details when necessary.
+Cluster these narratives in similar narratives and create a new narrative description for each cluster in max. 100 words each.
 
 ### SPECIFICS
-When creating narratives, avoid using self-referential phrases or attributions like "claims the speaker", "according to the speaker", or any similar terms. Ensure that all statements are in active language and present tense. This is crucial for the accurate creation of triples in a knowledge graph. Avoid using past participles as they can lead to inaccuracies and inconsistencies in the data structure. The results will used to detect hate speech and disinformation in a knowledge graph. If you include passive language or self-referential phrases this will fail  and the disinformation might not be detected.
+- Do NOT add new information that is not in the narratives. 
+- Try to use exactly the same words as much as possible, while leaving out irrelevant details when necessary.
+- Avoid creating clusters of just one or two narratives unless they are clearly subjective or biased.
+- Avoid using self-referential phrases or attributions like "claims the speaker", "according to the speaker", or any similar terms.
+- Ensure that all statements are in active language and present tense. This is crucial for the accurate creation of triples in a knowledge graph. 
+- Avoid using past participles as they can lead to inaccuracies and inconsistencies in the data structure. 
+The results will used to detect hate speech and disinformation in a knowledge graph. If you include passive language or self-referential phrases this will fail  and the disinformation might not be detected.
 
 ### RESULT
 Respond as a list of tuples. Each tuple consists of the new narrative description and a list of narrative-IDs on which it is based. For example: [("description1", [1, 2]), ("description2", [3, 4])]
@@ -54,3 +61,16 @@ Respond as a list of tuples. Each tuple consists of the new narrative descriptio
     chain = LLMChain(llm=llm, prompt=prompt_template, output_parser=NarrativeClusteringOutputParser())
     result = chain.invoke({"narrative_id_desc_map": (str(narrative_id_desc_map))})
     return result["text"]
+
+
+def cluster_narratives_with_retry(narrative_id_desc_map, max_retries=3):
+    retries = 0
+    while retries < max_retries:
+        try:
+            clusters = cluster_narratives(narrative_id_desc_map)
+            return clusters
+        except Exception as e:
+            print(f"Exception while clustering narratives: {e}")
+            retries += 1
+            if retries < max_retries:
+                time.sleep(60)

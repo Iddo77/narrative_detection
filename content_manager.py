@@ -1,7 +1,7 @@
 import json
 from datetime import date, datetime
 
-from narrative_clustering import cluster_narratives
+from narrative_clustering import cluster_narratives_with_retry
 from narrative import Narrative
 from video import Video
 
@@ -55,7 +55,7 @@ class ContentManager:
         if narrative_id in self.narrative_to_videos:
             self.narrative_to_videos[narrative_id].append(video_id)
         else:
-            self.narrative_to_videos[narrative_id] =[video_id]
+            self.narrative_to_videos[narrative_id] = [video_id]
 
     def get_video(self, video_id: str) -> Video:
         return self.videos.get(video_id)
@@ -81,7 +81,7 @@ class ContentManager:
         """
         result = []
         narrative_id_desc_map = {n.narrative_id: n.description for n in narratives}
-        clusters = cluster_narratives(narrative_id_desc_map)
+        clusters = cluster_narratives_with_retry(narrative_id_desc_map)
 
         # merge each cluster into a new narrative
         for description, based_on in clusters:

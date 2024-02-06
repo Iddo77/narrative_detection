@@ -40,7 +40,7 @@ def main():
 
     try:
         iterative_narrative_expansion(content_manager,
-                                      "Palestine",
+                                      "Israel Hamas",
                                       start_date,
                                       max_iterations=3,
                                       max_total_videos=500)
