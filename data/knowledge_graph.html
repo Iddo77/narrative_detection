@@ -1,0 +1,250 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 750px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+             #loadingBar {
+                 position:absolute;
+                 top:0px;
+                 left:0px;
+                 width: 100%;
+                 height: 750px;
+                 background-color:rgba(200,200,200,0.8);
+                 -webkit-transition: all 0.5s ease;
+                 -moz-transition: all 0.5s ease;
+                 -ms-transition: all 0.5s ease;
+                 -o-transition: all 0.5s ease;
+                 transition: all 0.5s ease;
+                 opacity:1;
+             }
+
+             #bar {
+                 position:absolute;
+                 top:0px;
+                 left:0px;
+                 width:20px;
+                 height:20px;
+                 margin:auto auto auto auto;
+                 border-radius:11px;
+                 border:2px solid rgba(30,30,30,0.05);
+                 background: rgb(0, 173, 246); /* Old browsers */
+                 box-shadow: 2px 0px 4px rgba(0,0,0,0.4);
+             }
+
+             #border {
+                 position:absolute;
+                 top:10px;
+                 left:10px;
+                 width:500px;
+                 height:23px;
+                 margin:auto auto auto auto;
+                 box-shadow: 0px 0px 4px rgba(0,0,0,0.2);
+                 border-radius:10px;
+             }
+
+             #text {
+                 position:absolute;
+                 top:8px;
+                 left:530px;
+                 width:30px;
+                 height:50px;
+                 margin:auto auto auto auto;
+                 font-size:22px;
+                 color: #000000;
+             }
+
+             div.outerBorder {
+                 position:relative;
+                 top:400px;
+                 width:600px;
+                 height:44px;
+                 margin:auto auto auto auto;
+                 border:8px solid rgba(0,0,0,0.1);
+                 background: rgb(252,252,252); /* Old browsers */
+                 background: -moz-linear-gradient(top,  rgba(252,252,252,1) 0%, rgba(237,237,237,1) 100%); /* FF3.6+ */
+                 background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(252,252,252,1)), color-stop(100%,rgba(237,237,237,1))); /* Chrome,Safari4+ */
+                 background: -webkit-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* Chrome10+,Safari5.1+ */
+                 background: -o-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* Opera 11.10+ */
+                 background: -ms-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* IE10+ */
+                 background: linear-gradient(to bottom,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* W3C */
+                 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfcfc', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+                 border-radius:72px;
+                 box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+             }
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+            <div id="loadingBar">
+              <div class="outerBorder">
+                <div id="text">0%</div>
+                <div id="border">
+                  <div id="bar"></div>
+                </div>
+              </div>
+            </div>
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#97c2fc", "id": "Accomplice activity", "label": "Accomplice activity", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "conflict violence", "label": "conflict violence", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Accounts", "label": "Accounts", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "sexual violence by militants", "label": "sexual violence by militants", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Accusations", "label": "Accusations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "complicity in violence", "label": "complicity in violence", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Aggressive tactics", "label": "Aggressive tactics", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "civilian casualties", "label": "civilian casualties", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Airstrikes", "label": "Airstrikes", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "militant-controlled regions", "label": "militant-controlled regions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Authenticity", "label": "Authenticity", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "government-issued witness accounts", "label": "government-issued witness accounts", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Civil unrest", "label": "Civil unrest", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "global issue", "label": "global issue", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Conflict in the Middle East", "label": "Conflict in the Middle East", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "separately from", "label": "separately from", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "political leaders", "label": "political leaders", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "public opinion", "label": "public opinion", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Hostage-taking", "label": "Hostage-taking", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Conflict", "label": "Conflict", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "threats", "label": "threats", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Israel-Hamas", "label": "Israel-Hamas", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "7 October 2023", "label": "7 October 2023", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Security measures", "label": "Security measures", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Conflicts", "label": "Conflicts", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "potential for war", "label": "potential for war", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Israel-Hamas conflict", "label": "Israel-Hamas conflict", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Controversies", "label": "Controversies", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "UNRWA disputes", "label": "UNRWA disputes", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Controversy", "label": "Controversy", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "targeting directives", "label": "targeting directives", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Counter-threats", "label": "Counter-threats", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Israeli interests", "label": "Israeli interests", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "US interests", "label": "US interests", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Criticism", "label": "Criticism", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Israeli war crimes allegations", "label": "Israeli war crimes allegations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "impact on civilians", "label": "impact on civilians", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Debates", "label": "Debates", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "US domestic political implications", "label": "US domestic political implications", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "naval deterrence", "label": "naval deterrence", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "responses to conflict", "label": "responses to conflict", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Demonstrations", "label": "Demonstrations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "globally", "label": "globally", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "conflict", "label": "conflict", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Protests", "label": "Protests", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Hostilities", "label": "Hostilities", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Domestic pressure", "label": "Domestic pressure", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "governments", "label": "governments", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Educational institutions", "label": "Educational institutions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "internal divisions", "label": "internal divisions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Environmental issues", "label": "Environmental issues", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "global crises", "label": "global crises", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Health crises", "label": "Health crises", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Ethical considerations", "label": "Ethical considerations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "US domestic politics", "label": "US domestic politics", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Fears", "label": "Fears", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "broader conflict", "label": "broader conflict", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "global security challenges", "label": "global security challenges", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Focus", "label": "Focus", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Islamophobia", "label": "Islamophobia", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "anti-Semitism", "label": "anti-Semitism", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Gaza", "label": "Gaza", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "shortages", "label": "shortages", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "high casualties", "label": "high casualties", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "humanitarian crisis", "label": "humanitarian crisis", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "infrastructure damage", "label": "infrastructure damage", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Israel", "label": "Israel", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Global events", "label": "Global events", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "policy focus", "label": "policy focus", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Global opinion", "label": "Global opinion", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "political actions", "label": "political actions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Global protests", "label": "Global protests", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Palestinian rights", "label": "Palestinian rights", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Global skepticism", "label": "Global skepticism", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Israeli claims", "label": "Israeli claims", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Hamas", "label": "Hamas", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "prisoner exchange", "label": "prisoner exchange", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "military withdrawal", "label": "military withdrawal", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "stop to Israeli aggression", "label": "stop to Israeli aggression", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "ceasefire talks", "label": "ceasefire talks", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Israeli captives", "label": "Israeli captives", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "gradual conflict de-escalation", "label": "gradual conflict de-escalation", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "retaliatory measures", "label": "retaliatory measures", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Sexual violence", "label": "Sexual violence", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Hezbollah", "label": "Hezbollah", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Lebanon", "label": "Lebanon", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "attacks", "label": "attacks", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Iran-aligned groups", "label": "Iran-aligned groups", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Hostage situations", "label": "Hostage situations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "international relations", "label": "international relations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "domestic pressure", "label": "domestic pressure", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Israeli public opinion", "label": "Israeli public opinion", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Hostage treatment", "label": "Hostage treatment", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "social polarization", "label": "social polarization", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "government decisions", "label": "government decisions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Humanitarian crisis", "label": "Humanitarian crisis", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "international aid", "label": "international aid", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "increase in aid efforts", "label": "increase in aid efforts", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Humanitarian organizations", "label": "Humanitarian organizations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "allegations of partiality", "label": "allegations of partiality", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "operational challenges", "label": "operational challenges", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "United Nations", "label": "United Nations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "IDF", "label": "IDF", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "militant infrastructure", "label": "militant infrastructure", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "strikes", "label": "strikes", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Impact", "label": "Impact", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "public health systems", "label": "public health systems", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Influence", "label": "Influence", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "proxy warfare", "label": "proxy warfare", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Iran", "label": "Iran", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Internal divisions", "label": "Internal divisions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "International concerns", "label": "International concerns", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "humanitarian issues", "label": "humanitarian issues", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "legal issues", "label": "legal issues", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "International criticism", "label": "International criticism", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "aggressive actions", "label": "aggressive actions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Iran-backed militias", "label": "Iran-backed militias", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "regional conflicts", "label": "regional conflicts", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "military actions", "label": "military actions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "calls for ceasefire", "label": "calls for ceasefire", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "counter-threats", "label": "counter-threats", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "officials", "label": "officials", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "ethical warfare", "label": "ethical warfare", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "right to self-defense", "label": "right to self-defense", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "military operations", "label": "military operations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "airstrikes", "label": "airstrikes", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "withdrawal", "label": "withdrawal", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "accountability", "label": "accountability", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "genocide claims", "label": "genocide claims", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "northern border", "label": "northern border", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "ground operations", "label": "ground operations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "war crime accusations", "label": "war crime accusations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "war crimes prosecution", "label": "war crimes prosecution", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "dismantle Hamas", "label": "dismantle Hamas", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "security actions", "label": "security actions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Reactions", "label": "Reactions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Israeli military operations", "label": "Israeli military operations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "global condemnation", "label": "global condemnation", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Israeli public", "label": "Israeli public", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "conditions of captivity", "label": "conditions of captivity", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "government actions", "label": "government actions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "treatment of captives", "label": "treatment of captives", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Journalistic disputes", "label": "Journalistic disputes", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "authenticity", "label": "authenticity", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Likelihood", "label": "Likelihood", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "regional war expansion", "label": "regional war expansion", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "wider war", "label": "wider war", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Media narratives", "label": "Media narratives", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "official reports", "label": "official reports", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Militants", "label": "Militants", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "rockets", "label": "rockets", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Military actions", "label": "Military actions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Israeli forces", "label": "Israeli forces", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "US forces", "label": "US forces", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Military aid", "label": "Military aid", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "ethical issues", "label": "ethical issues", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Military campaigns", "label": "Military campaigns", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "concerns", "label": "concerns", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Military operations", "label": "Military operations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "militants", "label": "militants", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Negotiations", "label": "Negotiations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Egypt", "label": "Egypt", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Qatar", "label": "Qatar", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "US", "label": "US", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "hostage situations", "label": "hostage situations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Iran-aligned militants", "label": "Iran-aligned militants", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Iran\u0027s activities", "label": "Iran\u0027s activities", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "strategic challenges", "label": "strategic challenges", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "strategic response", "label": "strategic response", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "security protocols", "label": "security protocols", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "hostage negotiations", "label": "hostage negotiations", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Iranian hostility", "label": "Iranian hostility", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "complex alliance with Israel", "label": "complex alliance with Israel", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Officials", "label": "Officials", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Syria", "label": "Syria", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Policy decisions", "label": "Policy decisions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "global protests", "label": "global protests", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Political activities", "label": "Political activities", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "the US", "label": "the US", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Political pressures", "label": "Political pressures", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Israeli leadership", "label": "Israeli leadership", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "US leadership", "label": "US leadership", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "President Biden", "label": "President Biden", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "conflict resolution", "label": "conflict resolution", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "hostage crisis management", "label": "hostage crisis management", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "misinformation issues", "label": "misinformation issues", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Prime Minister Netanyahu", "label": "Prime Minister Netanyahu", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Proposals", "label": "Proposals", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "cease hostilities", "label": "cease hostilities", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "release of captives", "label": "release of captives", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "elimination of Hamas", "label": "elimination of Hamas", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Proxy warfare", "label": "Proxy warfare", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "regional stability", "label": "regional stability", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Public opinion", "label": "Public opinion", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "divided", "label": "divided", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "blockade of aid", "label": "blockade of aid", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "demands for ceasefire", "label": "demands for ceasefire", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "media scrutiny", "label": "media scrutiny", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "reduction of funds", "label": "reduction of funds", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Regional conflicts", "label": "Regional conflicts", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "casualties", "label": "casualties", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Relationships", "label": "Relationships", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "military aid", "label": "military aid", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Reports", "label": "Reports", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "retracted", "label": "retracted", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "positions", "label": "positions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "advancements", "label": "advancements", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Responses", "label": "Responses", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "attacks on US personnel", "label": "attacks on US personnel", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "high alert", "label": "high alert", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Shortages", "label": "Shortages", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "essential goods", "label": "essential goods", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Targeting policies", "label": "Targeting policies", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "hospitals", "label": "hospitals", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "medical staff", "label": "medical staff", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Tehran", "label": "Tehran", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "attacks by militants", "label": "attacks by militants", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "aggression", "label": "aggression", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Tensions", "label": "Tensions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "in Middle East", "label": "in Middle East", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "US involvement", "label": "US involvement", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "participation in hostilities", "label": "participation in hostilities", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "rise in international tensions", "label": "rise in international tensions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "allegations of bias", "label": "allegations of bias", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Violence", "label": "Violence", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "sexual assaults by militants", "label": "sexual assaults by militants", "shape": "dot", "size": 10}]);
+                  edges = new vis.DataSet([{"from": "Accomplice activity", "title": "relates to", "to": "conflict violence", "width": 1}, {"from": "Accounts", "title": "detail", "to": "sexual violence by militants", "width": 1}, {"from": "Accusations", "title": "regard", "to": "complicity in violence", "width": 1}, {"from": "Aggressive tactics", "title": "result in", "to": "civilian casualties", "width": 1}, {"from": "Airstrikes", "title": "target", "to": "militant-controlled regions", "width": 1}, {"from": "Authenticity", "title": "pertains to", "to": "government-issued witness accounts", "width": 1}, {"from": "Civil unrest", "title": "is categorized as", "to": "global issue", "width": 1}, {"from": "Conflict in the Middle East", "title": "exists", "to": "separately from", "width": 1}, {"from": "Conflict in the Middle East", "title": "implicates", "to": "political leaders", "width": 1}, {"from": "Conflict in the Middle East", "title": "sways", "to": "public opinion", "width": 1}, {"from": "public opinion", "title": "influences", "to": "Hostage-taking", "width": 1}, {"from": "Conflict", "title": "is linked to", "to": "threats", "width": 1}, {"from": "Conflict", "title": "is", "to": "Israel-Hamas", "width": 1}, {"from": "Conflict", "title": "starts on", "to": "7 October 2023", "width": 1}, {"from": "threats", "title": "guard against", "to": "Security measures", "width": 1}, {"from": "Conflicts", "title": "increase the", "to": "potential for war", "width": 1}, {"from": "7 October 2023", "title": "starts on", "to": "Israel-Hamas conflict", "width": 1}, {"from": "Controversies", "title": "involve", "to": "UNRWA disputes", "width": 1}, {"from": "Controversy", "title": "arises over", "to": "targeting directives", "width": 1}, {"from": "Counter-threats", "title": "target", "to": "Israeli interests", "width": 1}, {"from": "Counter-threats", "title": "target", "to": "US interests", "width": 1}, {"from": "Criticism", "title": "addresses", "to": "Israeli war crimes allegations", "width": 1}, {"from": "Criticism", "title": "addresses", "to": "impact on civilians", "width": 1}, {"from": "Debates", "title": "include", "to": "US domestic political implications", "width": 1}, {"from": "Debates", "title": "include", "to": "naval deterrence", "width": 1}, {"from": "Debates", "title": "include", "to": "responses to conflict", "width": 1}, {"from": "Demonstrations", "title": "occur", "to": "globally", "width": 1}, {"from": "Demonstrations", "title": "respond to", "to": "conflict", "width": 1}, {"from": "globally", "title": "take place", "to": "Protests", "width": 1}, {"from": "conflict", "title": "persist in", "to": "Hostilities", "width": 1}, {"from": "conflict", "title": "react to", "to": "Protests", "width": 1}, {"from": "Domestic pressure", "title": "is applied to", "to": "governments", "width": 1}, {"from": "Educational institutions", "title": "deal with", "to": "internal divisions", "width": 1}, {"from": "Environmental issues", "title": "are recognized as", "to": "global crises", "width": 1}, {"from": "global crises", "title": "are recognized as", "to": "Health crises", "width": 1}, {"from": "Ethical considerations", "title": "influence", "to": "US domestic politics", "width": 1}, {"from": "Fears", "title": "regard", "to": "broader conflict", "width": 1}, {"from": "Fears", "title": "regard", "to": "global security challenges", "width": 1}, {"from": "Focus", "title": "is on", "to": "Islamophobia", "width": 1}, {"from": "Focus", "title": "is on", "to": "anti-Semitism", "width": 1}, {"from": "Gaza", "title": "experiences", "to": "shortages", "width": 1}, {"from": "Gaza", "title": "has", "to": "high casualties", "width": 1}, {"from": "Gaza", "title": "is in", "to": "humanitarian crisis", "width": 1}, {"from": "Gaza", "title": "suffers", "to": "infrastructure damage", "width": 1}, {"from": "Gaza", "title": "operates in", "to": "Israel", "width": 1}, {"from": "Global events", "title": "compete for", "to": "policy focus", "width": 1}, {"from": "Global opinion", "title": "scrutinizes", "to": "political actions", "width": 1}, {"from": "Global protests", "title": "call for", "to": "Palestinian rights", "width": 1}, {"from": "Global skepticism", "title": "questions", "to": "Israeli claims", "width": 1}, {"from": "Hamas", "title": "considers", "to": "prisoner exchange", "width": 1}, {"from": "Hamas", "title": "demands", "to": "military withdrawal", "width": 1}, {"from": "Hamas", "title": "demands", "to": "stop to Israeli aggression", "width": 1}, {"from": "Hamas", "title": "engages in", "to": "ceasefire talks", "width": 1}, {"from": "Hamas", "title": "holds", "to": "Israeli captives", "width": 1}, {"from": "Hamas", "title": "negotiates", "to": "gradual conflict de-escalation", "width": 1}, {"from": "Hamas", "title": "takes", "to": "retaliatory measures", "width": 1}, {"from": "Hamas", "title": "involves", "to": "Sexual violence", "width": 1}, {"from": "Hezbollah", "title": "is based in", "to": "Lebanon", "width": 1}, {"from": "Hezbollah", "title": "launches", "to": "attacks", "width": 1}, {"from": "Hezbollah", "title": "targets", "to": "Israel", "width": 1}, {"from": "attacks", "title": "launch", "to": "Iran-aligned groups", "width": 1}, {"from": "Hostage situations", "title": "affect", "to": "international relations", "width": 1}, {"from": "Hostage situations", "title": "create", "to": "domestic pressure", "width": 1}, {"from": "Hostage situations", "title": "shape", "to": "Israeli public opinion", "width": 1}, {"from": "Hostage treatment", "title": "exacerbates", "to": "social polarization", "width": 1}, {"from": "Hostage-taking", "title": "affects", "to": "government decisions", "width": 1}, {"from": "Humanitarian crisis", "title": "elicits", "to": "international aid", "width": 1}, {"from": "Humanitarian crisis", "title": "leads to", "to": "increase in aid efforts", "width": 1}, {"from": "Humanitarian organizations", "title": "face", "to": "allegations of partiality", "width": 1}, {"from": "Humanitarian organizations", "title": "face", "to": "operational challenges", "width": 1}, {"from": "operational challenges", "title": "face", "to": "United Nations", "width": 1}, {"from": "IDF", "title": "destroys", "to": "militant infrastructure", "width": 1}, {"from": "IDF", "title": "performs", "to": "strikes", "width": 1}, {"from": "strikes", "title": "performs", "to": "Israel", "width": 1}, {"from": "Impact", "title": "affects", "to": "public health systems", "width": 1}, {"from": "Influence", "title": "occurs through", "to": "proxy warfare", "width": 1}, {"from": "proxy warfare", "title": "supports", "to": "Iran", "width": 1}, {"from": "Internal divisions", "title": "concern", "to": "Israel-Hamas conflict", "width": 1}, {"from": "International concerns", "title": "address", "to": "humanitarian issues", "width": 1}, {"from": "International concerns", "title": "address", "to": "legal issues", "width": 1}, {"from": "International criticism", "title": "targets", "to": "aggressive actions", "width": 1}, {"from": "Iran-backed militias", "title": "participate in", "to": "regional conflicts", "width": 1}, {"from": "Iran", "title": "continues", "to": "military actions", "width": 1}, {"from": "Iran", "title": "disregards", "to": "calls for ceasefire", "width": 1}, {"from": "Iran", "title": "issues", "to": "counter-threats", "width": 1}, {"from": "Iran", "title": "relocates", "to": "officials", "width": 1}, {"from": "military actions", "title": "justifies", "to": "Israel", "width": 1}, {"from": "Israel", "title": "advocates", "to": "ethical warfare", "width": 1}, {"from": "Israel", "title": "asserts", "to": "right to self-defense", "width": 1}, {"from": "Israel", "title": "ceases", "to": "military operations", "width": 1}, {"from": "Israel", "title": "conducts", "to": "airstrikes", "width": 1}, {"from": "Israel", "title": "considers", "to": "withdrawal", "width": 1}, {"from": "Israel", "title": "demands", "to": "accountability", "width": 1}, {"from": "Israel", "title": "denies", "to": "genocide claims", "width": 1}, {"from": "Israel", "title": "operates in", "to": "northern border", "width": 1}, {"from": "Israel", "title": "prepares for", "to": "ground operations", "width": 1}, {"from": "Israel", "title": "refutes", "to": "war crime accusations", "width": 1}, {"from": "Israel", "title": "risks", "to": "war crimes prosecution", "width": 1}, {"from": "Israel", "title": "seeks to", "to": "dismantle Hamas", "width": 1}, {"from": "Israel", "title": "takes", "to": "security actions", "width": 1}, {"from": "Israel", "title": "emerge in", "to": "Reactions", "width": 1}, {"from": "Israeli military operations", "title": "provoke", "to": "global condemnation", "width": 1}, {"from": "Israeli public", "title": "reacts to", "to": "conditions of captivity", "width": 1}, {"from": "Israeli public", "title": "reacts to", "to": "government actions", "width": 1}, {"from": "Israeli public", "title": "reacts to", "to": "treatment of captives", "width": 1}, {"from": "Journalistic disputes", "title": "question", "to": "authenticity", "width": 1}, {"from": "Likelihood", "title": "is of", "to": "regional war expansion", "width": 1}, {"from": "Likelihood", "title": "is of", "to": "wider war", "width": 1}, {"from": "Media narratives", "title": "contest", "to": "official reports", "width": 1}, {"from": "Militants", "title": "launch", "to": "rockets", "width": 1}, {"from": "Military actions", "title": "target", "to": "Israeli forces", "width": 1}, {"from": "Military actions", "title": "target", "to": "US forces", "width": 1}, {"from": "Military aid", "title": "faces criticism over", "to": "ethical issues", "width": 1}, {"from": "Military campaigns", "title": "intensify", "to": "concerns", "width": 1}, {"from": "Military operations", "title": "focus on", "to": "militants", "width": 1}, {"from": "Negotiations", "title": "involve", "to": "Egypt", "width": 1}, {"from": "Negotiations", "title": "involve", "to": "Qatar", "width": 1}, {"from": "Negotiations", "title": "involve", "to": "US", "width": 1}, {"from": "Qatar", "title": "is involved in", "to": "hostage situations", "width": 1}, {"from": "US", "title": "confronts", "to": "Iran-aligned militants", "width": 1}, {"from": "US", "title": "counters", "to": "Iran\u0027s activities", "width": 1}, {"from": "US", "title": "deals with", "to": "strategic challenges", "width": 1}, {"from": "US", "title": "develops", "to": "strategic response", "width": 1}, {"from": "US", "title": "implements", "to": "security protocols", "width": 1}, {"from": "US", "title": "is involved in", "to": "hostage negotiations", "width": 1}, {"from": "US", "title": "reacts to", "to": "Iranian hostility", "width": 1}, {"from": "US", "title": "upholds", "to": "complex alliance with Israel", "width": 1}, {"from": "Officials", "title": "are from", "to": "Syria", "width": 1}, {"from": "Policy decisions", "title": "experience", "to": "global protests", "width": 1}, {"from": "Political activities", "title": "take place in", "to": "the US", "width": 1}, {"from": "Political pressures", "title": "shape", "to": "Israeli leadership", "width": 1}, {"from": "Political pressures", "title": "shape", "to": "US leadership", "width": 1}, {"from": "President Biden", "title": "is involved in", "to": "conflict resolution", "width": 1}, {"from": "President Biden", "title": "is involved in", "to": "hostage crisis management", "width": 1}, {"from": "President Biden", "title": "is involved in", "to": "misinformation issues", "width": 1}, {"from": "conflict resolution", "title": "is involved in", "to": "Prime Minister Netanyahu", "width": 1}, {"from": "hostage crisis management", "title": "is involved in", "to": "Prime Minister Netanyahu", "width": 1}, {"from": "misinformation issues", "title": "is involved in", "to": "Prime Minister Netanyahu", "width": 1}, {"from": "Proposals", "title": "aim to", "to": "cease hostilities", "width": 1}, {"from": "Proposals", "title": "include", "to": "release of captives", "width": 1}, {"from": "Proposals", "title": "suggest", "to": "elimination of Hamas", "width": 1}, {"from": "Proxy warfare", "title": "affects", "to": "regional stability", "width": 1}, {"from": "Public opinion", "title": "is", "to": "divided", "width": 1}, {"from": "Reactions", "title": "include", "to": "blockade of aid", "width": 1}, {"from": "Reactions", "title": "include", "to": "demands for ceasefire", "width": 1}, {"from": "Reactions", "title": "include", "to": "media scrutiny", "width": 1}, {"from": "Reactions", "title": "include", "to": "reduction of funds", "width": 1}, {"from": "Regional conflicts", "title": "lead to", "to": "casualties", "width": 1}, {"from": "Relationships", "title": "revolve around", "to": "military aid", "width": 1}, {"from": "Reports", "title": "are", "to": "retracted", "width": 1}, {"from": "Reports", "title": "disclose", "to": "positions", "width": 1}, {"from": "Reports", "title": "indicate", "to": "advancements", "width": 1}, {"from": "Responses", "title": "to", "to": "attacks on US personnel", "width": 1}, {"from": "Security measures", "title": "involve", "to": "high alert", "width": 1}, {"from": "Shortages", "title": "are of", "to": "essential goods", "width": 1}, {"from": "Targeting policies", "title": "affect", "to": "hospitals", "width": 1}, {"from": "Targeting policies", "title": "affect", "to": "medical staff", "width": 1}, {"from": "Tehran", "title": "is amidst", "to": "attacks by militants", "width": 1}, {"from": "Tehran", "title": "warns against", "to": "aggression", "width": 1}, {"from": "Tensions", "title": "worsen", "to": "in Middle East", "width": 1}, {"from": "US involvement", "title": "leads to", "to": "participation in hostilities", "width": 1}, {"from": "US involvement", "title": "leads to", "to": "rise in international tensions", "width": 1}, {"from": "United Nations", "title": "face", "to": "allegations of bias", "width": 1}, {"from": "Violence", "title": "includes", "to": "sexual assaults by militants", "width": 1}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+                      network.on("stabilizationProgress", function(params) {
+                          document.getElementById('loadingBar').removeAttribute("style");
+                          var maxWidth = 496;
+                          var minWidth = 20;
+                          var widthFactor = params.iterations/params.total;
+                          var width = Math.max(minWidth,maxWidth * widthFactor);
+                          document.getElementById('bar').style.width = width + 'px';
+                          document.getElementById('text').innerHTML = Math.round(widthFactor*100) + '%';
+                      });
+                      network.once("stabilizationIterationsDone", function() {
+                          document.getElementById('text').innerHTML = '100%';
+                          document.getElementById('bar').style.width = '496px';
+                          document.getElementById('loadingBar').style.opacity = 0;
+                          // really clean the dom element
+                          setTimeout(function () {document.getElementById('loadingBar').style.display = 'none';}, 500);
+                      });
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>
